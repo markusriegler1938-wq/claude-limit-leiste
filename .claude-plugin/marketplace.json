@@ -1,0 +1,5 @@
+{
+  "name": "claude-limit-leiste",
+  "owner": { "name": "markusriegler1938-wq" },
+  "plugins": [{ "name": "limit-band", "source": "./" }]
+}

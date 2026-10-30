@@ -1,0 +1,1 @@
+{ "name": "limit-band", "version": "0.1.1", "description": "Leiste über dem Eingabefeld: Kontext, 5-Std-Limit und Wochenlimit mit Reset-Zeit", "types": "./types/index.d.ts", "license": "MIT" }
