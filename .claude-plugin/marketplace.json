@@ -1,5 +1,15 @@
 {
   "name": "claude-limit-leiste",
-  "owner": { "name": "markusriegler1938-wq" },
-  "plugins": [{ "name": "limit-band", "source": "./" }]
+  "owner": {
+    "name": "markusriegler1938-wq"
+  },
+  "plugins": [
+    {
+      "name": "limit-band",
+      "source": "./",
+      "version": "0.2.0",
+      "description": "Leiste über dem Eingabefeld: 5-Std-Limit und Wochenlimit mit Reset-Zeit"
+    }
+  ],
+  "description": "Limit-Leiste für Claude Code"
 }
