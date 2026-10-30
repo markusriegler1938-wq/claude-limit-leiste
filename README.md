@@ -3,15 +3,15 @@
 Eine Leiste direkt über dem Eingabefeld, die immer zeigt, wie viel du verbraucht hast:
 
 ```
-Kontext ██░░░░░░░░ 9 %   5-Std-Limit █░░░░░░░░░ 9 % Reset 16:10 Uhr   Wochenlimit ██░░░░░░░░ 19 % Reset Do 04:00
+5-Std-Limit █░░░░░░░░░ 14 %  Reset 22:30 Uhr    Wochenlimit █░░░░░░░░░ 9 %  Reset So 06:00
 ```
 
-- **Kontext**: wie voll das Gedächtnis des aktuellen Chats ist
 - **5-Std-Limit**: Verbrauch im laufenden 5-Stunden-Fenster, mit Reset-Uhrzeit
 - **Wochenlimit**: Verbrauch in der laufenden Woche, mit Reset-Tag und -Uhrzeit
 - Farben: grün bis 60 %, gelb bis 85 %, rot darüber
 - Zeiten in deutscher Zeit (Europe/Berlin)
 - Aktualisiert sich nach jeder Antwort von selbst
+- Bei schmalem Fenster stehen die Balken untereinander, bei breitem nebeneinander
 
 Läuft in der Claude-Desktop-App (Code-Tab) und im Terminal. In der Handy-App wird die Leiste nicht angezeigt.
 

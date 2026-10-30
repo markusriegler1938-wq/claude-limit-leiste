@@ -1,5 +1,5 @@
 import { atom, read, update } from 'claude-code'
-import type { Register, SessionContextUsage, SessionRateLimit } from 'claude-code'
+import type { Register, SessionRateLimit } from 'claude-code'
 
 import type { Limits, Meter } from '../types'
 
@@ -7,13 +7,15 @@ const limits = atom({ plugin: 'limit-band', key: 'limits' } as const, null)
 
 const CELLS = 10
 const TIME_ZONE = 'Europe/Berlin'
+// Ab dieser Breite stehen beide Balken nebeneinander, sonst untereinander
+const ONE_ROW_COLUMNS = 92
 
-const toLimits = (context: SessionContextUsage, rateLimits: SessionRateLimit[]): Limits => {
+const toLimits = (rateLimits: SessionRateLimit[]): Limits => {
   const meter = (kind: string): Meter | undefined => {
     const w = rateLimits.find(r => r.kind === kind)
     return w && { percent: w.percentUsed, resetsAt: w.resetsAt }
   }
-  return { context: context.percent, fiveHour: meter('five_hour'), week: meter('seven_day') }
+  return { fiveHour: meter('five_hour'), week: meter('seven_day') }
 }
 
 // Grün bis 60 %, gelb bis 85 %, dann rot
@@ -39,12 +41,12 @@ export const register: Register = on => {
   on('session.start', async ($, e, next) => {
     const result = await next(e)
     const usage = await $.session.usage()
-    await update($, limits, () => toLimits(usage.context, usage.rateLimits))
+    await update($, limits, () => toLimits(usage.rateLimits))
     return result
   })
 
   on('session.measure', async ($, e, next) => {
-    await update($, limits, () => toLimits(e.context, e.rateLimits))
+    await update($, limits, () => toLimits(e.rateLimits))
     return next(e)
   })
 
@@ -56,35 +58,35 @@ export const register: Register = on => {
 
     const { Box, Text } = $.ui.resolve(e)
 
-    const bar = (label: string, percent: number | undefined, reset: string) => {
-      if (percent === undefined) return null
+    // Eine Zeile pro Balken, als ein einziger Text, damit nichts auseinanderbricht
+    const meter = (label: string, value: Meter | undefined, reset: string) => {
+      if (value === undefined) return null
+      const { percent } = value
       const filled = Math.min(CELLS, Math.max(percent > 0 ? 1 : 0, Math.round((percent / 100) * CELLS)))
       const color = colorFor(percent)
       return (
-        <Box flexDirection="row" marginRight={3}>
-          <Text weight="semibold">{label} </Text>
-          <Text color={color}>{'█'.repeat(filled)}</Text>
-          <Text dimColor>{'░'.repeat(CELLS - filled)}</Text>
-          <Text color={color} tabular> {Math.round(percent)} %</Text>
-          {reset ? <Text dimColor> {reset}</Text> : null}
+        <Box flexShrink={0} marginRight={4}>
+          <Text wrap="truncate-end">
+            <Text weight="semibold">{label} </Text>
+            <Text color={color}>{'█'.repeat(filled)}</Text>
+            <Text dimColor>{'░'.repeat(CELLS - filled)}</Text>
+            <Text color={color} tabular> {Math.round(percent)} %</Text>
+            {reset ? <Text dimColor>  {reset}</Text> : null}
+          </Text>
         </Box>
       )
     }
 
     const parts = [
-      bar('Kontext', current.context, ''),
-      bar('5-Std-Limit', current.fiveHour?.percent, formatReset(current.fiveHour?.resetsAt, false)),
-      bar('Wochenlimit', current.week?.percent, formatReset(current.week?.resetsAt, true)),
+      meter('5-Std-Limit', current.fiveHour, formatReset(current.fiveHour?.resetsAt, false)),
+      meter('Wochenlimit', current.week, formatReset(current.week?.resetsAt, true)),
     ].filter(Boolean)
 
     if (parts.length === 0) {
       return next(e)
     }
 
-    return (
-      <Box flexDirection="row" flexWrap="wrap">
-        {parts}
-      </Box>
-    )
+    const isWide = e.props.bodyColumns >= ONE_ROW_COLUMNS
+    return <Box flexDirection={isWide ? 'row' : 'column'}>{parts}</Box>
   })
 }
